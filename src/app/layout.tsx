@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const viewport: Viewport = {
-  themeColor: '#0c0908',
+  themeColor: '#faebd7',
   width: 'device-width',
   initialScale: 1,
 };
@@ -76,8 +76,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased bg-gengar-ink-black text-parchment-cream min-h-screen selection:bg-gengar-bright-violet selection:text-white">
+    <html lang="en">
+      <body className="antialiased bg-parchment-pale text-stone-900 min-h-screen selection:bg-gengar-bright-violet selection:text-white font-sans">
         {children}
       </body>
     </html>

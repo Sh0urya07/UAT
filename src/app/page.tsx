@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import anime from 'animejs';
 import { Header } from '@/components/Header';
 import { HeroAuditInput } from '@/components/HeroAuditInput';
 import { AuditDashboard } from '@/components/AuditDashboard';
@@ -14,6 +15,61 @@ export default function HomePage() {
   const [report, setReport] = useState<AuditReport>(DEMO_PRESETS['nextjs-saas']);
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const dashboardRef = useRef<HTMLDivElement>(null);
+
+  // Cinematic page entrance choreography inspired by reference video
+  useEffect(() => {
+    const tl = anime.timeline({
+      easing: 'easeOutCubic',
+    });
+
+    tl.add({
+      targets: 'header',
+      translateY: [-20, 0],
+      opacity: [0, 1],
+      duration: 650,
+    })
+      .add(
+        {
+          targets: ['.hero-title', '.hero-subtitle'],
+          translateY: [20, 0],
+          opacity: [0, 1],
+          delay: anime.stagger(100),
+          duration: 700,
+        },
+        '-=350'
+      )
+      .add(
+        {
+          targets: '.hero-search',
+          scale: [0.96, 1],
+          opacity: [0, 1],
+          duration: 600,
+          easing: 'easeOutElastic(1, .8)',
+        },
+        '-=300'
+      )
+      .add(
+        {
+          targets: '.hero-presets button',
+          scale: [0.85, 1],
+          opacity: [0, 1],
+          delay: anime.stagger(60),
+          duration: 500,
+          easing: 'easeOutBack',
+        },
+        '-=300'
+      )
+      .add(
+        {
+          targets: dashboardRef.current,
+          opacity: [0, 1],
+          translateY: [15, 0],
+          duration: 600,
+        },
+        '-=200'
+      );
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -91,15 +147,15 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gengar-ink-black bg-unova-grid relative text-parchment-pale selection:bg-gengar-bright-violet selection:text-white">
+    <div className="min-h-screen bg-transparent relative text-stone-900 selection:bg-gengar-bright-violet selection:text-white">
       {/* Interactive Three.js WebGL Particle & Violet Aura Background */}
       <ThreeCanvasBackground isAuditing={isLoading} />
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-gengar-deep-purple/95 border border-gengar-bright-violet/50 text-aura-light-lavender text-xs font-mono shadow-glow-violet backdrop-blur-xl animate-in slide-in-from-bottom-5">
-          <Sparkles className="w-4 h-4 text-eye-glow-orange shrink-0" />
-          <span>{toastMessage}</span>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-white/95 border border-stone-300 text-stone-900 text-xs font-mono shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5">
+          <Sparkles className="w-4 h-4 text-orange-600 shrink-0" />
+          <span className="font-semibold">{toastMessage}</span>
         </div>
       )}
 
@@ -120,28 +176,30 @@ export default function HomePage() {
           onSelectPreset={handleSelectPreset}
         />
 
-        {/* Audit Dashboard */}
-        <AuditDashboard report={report} onExportSarif={handleExportSarif} />
+        {/* Audit Dashboard with Animated Container */}
+        <div ref={dashboardRef}>
+          <AuditDashboard report={report} onExportSarif={handleExportSarif} />
+        </div>
       </main>
 
       {/* Enterprise Footer */}
-      <footer className="w-full border-t border-gengar-bright-violet/20 bg-gengar-calligraphy-black/90 py-8 text-center text-xs font-mono text-smoke-taupe">
+      <footer className="w-full border-t border-stone-300/80 bg-white/80 backdrop-blur-md py-8 text-center text-xs font-mono text-stone-600">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-parchment-cream font-bold">UNOVA // UAT ENGINE</span>
-            <span>•</span>
+            <span className="text-stone-900 font-bold">UNOVA // UAT ENGINE</span>
+            <span className="text-stone-400">•</span>
             <a
               href="https://uat.unova.co.in"
               target="_blank"
               rel="noreferrer"
-              className="text-aura-light-lavender hover:underline flex items-center gap-1"
+              className="text-gengar-bright-violet font-semibold hover:underline flex items-center gap-1"
             >
               <span>uat.unova.co.in</span>
-              <ExternalLink className="w-3 h-3 opacity-60" />
+              <ExternalLink className="w-3 h-3 opacity-70" />
             </a>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] text-smoke-sepia">
+          <div className="flex items-center gap-4 text-[11px] text-stone-500">
             <span>Google Search Essentials</span>
             <span>•</span>
             <span>Core Web Vitals v2024</span>

@@ -49,72 +49,94 @@ export function HeroAuditInput({ onRunAudit, isLoading, onSelectPreset }: HeroAu
   return (
     <div className="w-full max-w-3xl mx-auto pt-10 pb-8 px-4 text-center">
       {/* Title */}
-      <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-parchment-cream mb-2">
+      <h1 className="hero-title text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 mb-2 select-none">
         Unova Diagnostic Suite
       </h1>
-      <p className="text-sm text-smoke-taupe max-w-lg mx-auto mb-6">
+      <p className="hero-subtitle text-sm text-stone-600 max-w-lg mx-auto mb-6">
         Automated site auditing for Core Web Vitals, link compliance, React hydration, and defensive security.
       </p>
 
-      {/* Clean Input Command Bar */}
-      <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
-        <div className="flex items-center rounded-xl bg-gengar-calligraphy-black/90 border border-gengar-bright-violet/30 p-1.5 shadow-unova-glass backdrop-blur-md focus-within:border-aura-light-lavender focus-within:shadow-glow-lavender transition-all">
-          <div className="flex items-center flex-1 px-3 py-1">
-            <Globe className="w-4 h-4 text-aura-light-lavender shrink-0 mr-2.5" />
-            <input
-              type="text"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Enter target URL (e.g. unova.co.in or stripe.com)"
-              className="w-full bg-transparent text-sm text-parchment-pale placeholder-smoke-taupe focus:outline-none font-mono"
-              disabled={isLoading}
-            />
-          </div>
+      {/* Clean Input Command Bar with Holographic Scanline */}
+      <form onSubmit={handleSubmit} className="hero-search max-w-xl mx-auto">
+        <div className="relative overflow-hidden rounded-xl bg-white/95 border border-stone-300 p-1.5 shadow-md shadow-stone-900/5 backdrop-blur-md focus-within:border-gengar-bright-violet focus-within:ring-2 focus-within:ring-gengar-bright-violet/20 transition-all">
+          {/* Animated radar scanline when auditing */}
+          {isLoading && (
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-gengar-bright-violet/15 to-transparent animate-shimmer" />
+          )}
 
-          <button
-            ref={buttonRef}
-            type="submit"
-            disabled={isLoading || !urlInput.trim()}
-            className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-gradient-to-r from-gengar-base-purple to-gengar-bright-violet hover:from-gengar-bright-violet hover:to-aura-light-lavender text-parchment-cream font-semibold text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shrink-0"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="font-mono">Auditing</span>
-              </>
-            ) : (
-              <>
-                <span>Run Audit</span>
-                <ArrowRight className="w-3.5 h-3.5 text-eye-glow-orange" />
-              </>
-            )}
-          </button>
+          <div className="flex items-center">
+            <div className="flex items-center flex-1 px-3 py-1">
+              <Globe className="w-4 h-4 text-stone-500 shrink-0 mr-2.5" />
+              <input
+                type="text"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                placeholder="Enter target URL (e.g. unova.co.in or stripe.com)"
+                className="w-full bg-transparent text-sm text-stone-900 placeholder-stone-400 focus:outline-none font-mono"
+                disabled={isLoading}
+              />
+            </div>
+
+            <button
+              ref={buttonRef}
+              type="submit"
+              disabled={isLoading || !urlInput.trim()}
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shrink-0 active:scale-95"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-eye-glow-orange" />
+                  <span className="font-mono">Auditing</span>
+                </>
+              ) : (
+                <>
+                  <span>Run Audit</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-eye-glow-orange" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Loading status ticker */}
+        {/* Cinematic Telemetry Status Bar */}
         {isLoading && (
-          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-mono text-aura-light-lavender animate-pulse">
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-eye-glow-orange" />
-            <span>{loadingStep}</span>
+          <div className="mt-4 p-3 rounded-xl bg-white/95 border border-stone-200 shadow-md backdrop-blur-md animate-in fade-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between text-xs font-mono mb-2 px-1">
+              <div className="flex items-center gap-2 text-stone-800">
+                <span className="inline-block w-2 h-2 rounded-full bg-eye-glow-orange animate-ping" />
+                <span className="text-stone-900 font-medium">{loadingStep}</span>
+              </div>
+              <span className="text-[10px] text-stone-500 uppercase tracking-wider">Live Probe</span>
+            </div>
+            {/* Animated Gradient Progress Track */}
+            <div className="w-full h-1.5 rounded-full bg-stone-100 overflow-hidden relative">
+              <div className="h-full bg-gradient-to-r from-gengar-bright-violet via-eye-glow-orange to-aura-light-lavender animate-pulse w-full rounded-full" />
+            </div>
           </div>
         )}
       </form>
 
       {/* Quick Select Presets Bar */}
-      <div className="mt-4 flex items-center justify-center gap-2 text-xs font-mono">
-        <span className="text-smoke-taupe">Presets:</span>
+      <div className="hero-presets mt-4 flex items-center justify-center gap-2 text-xs font-mono">
+        <span className="text-stone-500">Presets:</span>
         <button
           type="button"
-          onClick={() => onSelectPreset('nextjs-saas')}
-          className="px-2.5 py-1 rounded-md bg-gengar-deep-purple/30 hover:bg-gengar-deep-purple/60 text-aura-light-lavender border border-gengar-bright-violet/20 hover:border-gengar-bright-violet/50 transition-all flex items-center gap-1"
+          onClick={() => {
+            setUrlInput('https://saas-dashboard.unova.co.in');
+            onSelectPreset('nextjs-saas');
+          }}
+          className="px-2.5 py-1 rounded-md bg-white hover:bg-stone-50 text-stone-800 border border-stone-300 hover:border-gengar-bright-violet transition-all flex items-center gap-1 active:scale-95 shadow-sm"
         >
-          <Sparkles className="w-3 h-3 text-eye-glow-orange" />
+          <Sparkles className="w-3 h-3 text-gengar-bright-violet" />
           <span>Next.js App</span>
         </button>
         <button
           type="button"
-          onClick={() => onSelectPreset('ecommerce-heavy')}
-          className="px-2.5 py-1 rounded-md bg-gengar-deep-purple/30 hover:bg-gengar-deep-purple/60 text-sun-muted-tan border border-sun-warm-ochre/20 hover:border-sun-warm-ochre/50 transition-all flex items-center gap-1"
+          onClick={() => {
+            setUrlInput('https://store.unova.co.in/shop');
+            onSelectPreset('ecommerce-heavy');
+          }}
+          className="px-2.5 py-1 rounded-md bg-white hover:bg-stone-50 text-stone-800 border border-stone-300 hover:border-eye-flame-red transition-all flex items-center gap-1 active:scale-95 shadow-sm"
         >
           <Shield className="w-3 h-3 text-eye-flame-red" />
           <span>E-Commerce Store</span>

@@ -10,6 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Direct palette aliases
+        "aura-light-lavender": "var(--aura-light-lavender)",
+        "eye-glow-orange": "var(--eye-glow-orange)",
+        "eye-flame-red": "var(--eye-flame-red)",
+        "parchment-cream": "var(--parchment-cream)",
+        "parchment-pale": "var(--parchment-pale)",
+        "smoke-taupe": "var(--smoke-taupe)",
+        "smoke-sepia": "var(--smoke-sepia)",
+        "sun-warm-ochre": "var(--sun-warm-ochre)",
+        "calligraphy-black": "var(--calligraphy-black)",
         // Gengar-inspired Design Palette
         gengar: {
           "ink-black": "var(--gengar-ink-black)",

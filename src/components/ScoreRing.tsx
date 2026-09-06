@@ -29,24 +29,24 @@ export function ScoreRing({
 
   // Determine color scheme based on score using Gengar palette
   let strokeGradient = 'url(#gengar-lavender-grad)';
-  let glowColor = 'rgba(177, 147, 199, 0.5)';
-  let textColor = 'text-aura-light-lavender';
+  let glowColor = 'rgba(125, 89, 143, 0.25)';
+  let textColor = 'text-gengar-bright-violet';
   let grade = 'A+';
 
   if (score < 50) {
     strokeGradient = 'url(#gengar-red-grad)';
-    glowColor = 'rgba(234, 58, 34, 0.6)';
+    glowColor = 'rgba(234, 58, 34, 0.3)';
     textColor = 'text-eye-flame-red';
     grade = 'F';
   } else if (score < 70) {
     strokeGradient = 'url(#gengar-orange-grad)';
-    glowColor = 'rgba(242, 97, 45, 0.55)';
+    glowColor = 'rgba(242, 97, 45, 0.25)';
     textColor = 'text-eye-glow-orange';
     grade = 'C';
   } else if (score < 90) {
     strokeGradient = 'url(#gengar-ochre-grad)';
-    glowColor = 'rgba(215, 180, 140, 0.5)';
-    textColor = 'text-sun-muted-tan';
+    glowColor = 'rgba(184, 134, 86, 0.25)';
+    textColor = 'text-sun-warm-ochre';
     grade = 'B+';
   }
 
@@ -87,7 +87,7 @@ export function ScoreRing({
           width={size}
           height={size}
           className="transform -rotate-90"
-          style={{ filter: `drop-shadow(0 0 10px ${glowColor})` }}
+          style={{ filter: `drop-shadow(0 0 8px ${glowColor})` }}
         >
           <defs>
             {/* Gengar lavender gradient */}
@@ -120,7 +120,7 @@ export function ScoreRing({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#2b1f31"
+            stroke="#e7e5e4"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -145,15 +145,15 @@ export function ScoreRing({
           <div className="flex items-baseline gap-0.5">
             <span
               ref={numberRef}
-              className={`text-3xl font-black tracking-tight font-mono ${textColor}`}
+              className="text-3xl font-black tracking-tight font-mono text-stone-900"
             >
               {displayScore}
             </span>
-            <span className="text-xs font-semibold text-smoke-taupe font-mono">/100</span>
+            <span className="text-xs font-semibold text-stone-400 font-mono">/100</span>
           </div>
           {showGrade && (
             <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border border-gengar-bright-violet/30 mt-0.5 bg-gengar-deep-purple/60 uppercase tracking-wider ${textColor}`}
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border border-stone-200 mt-0.5 bg-stone-100 uppercase tracking-wider ${textColor}`}
             >
               Grade {grade}
             </span>
@@ -161,11 +161,11 @@ export function ScoreRing({
         </div>
       </div>
 
-      <span className="mt-2 text-xs font-semibold uppercase tracking-wider text-parchment-cream text-center">
+      <span className="mt-2 text-xs font-bold uppercase tracking-wider text-stone-800 text-center">
         {label}
       </span>
       {subtitle && (
-        <span className="text-[11px] text-smoke-taupe text-center mt-0.5 max-w-[130px] truncate">
+        <span className="text-[11px] text-stone-500 text-center mt-0.5 max-w-[130px] truncate">
           {subtitle}
         </span>
       )}

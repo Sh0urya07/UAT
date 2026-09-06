@@ -1,0 +1,16 @@
+﻿{
+  "name": "Unova // UAT Engine",
+  "short_name": "Unova UAT",
+  "description": "Official Unova UAT Diagnostic Suite",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0908",
+  "theme_color": "#0c0908",
+  "icons": [
+    {
+      "src": "/unova-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

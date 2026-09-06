@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gengar-ink-black: #0c0908;
+  --calligraphy-black: #12100e;
+  --shadow-charcoal: #231b18;
+  --tree-bark-brown: #32231c;
+  --gengar-deep-purple: #2b1f31;
+  --gengar-base-purple: #493355;
+  --gengar-mid-violet: #62446f;
+  --gengar-bright-violet: #7d598f;
+  --aura-light-lavender: #b193c7;
+  --eye-flame-red: #ea3a22;
+  --eye-glow-orange: #f2612d;
+  --accent-rust: #b3391b;
+  --parchment-cream: #faebd7;
+  --parchment-pale: #f4ece1;
+  --sun-muted-tan: #d7b48c;
+  --sun-warm-ochre: #b88656;
+  --sun-deep-amber: #946237;
+  --smoke-sepia: #73594b;
+  --smoke-taupe: #9e8473;
+  --mist-grey-brown: #c8b7aa;
+}
+
+body {
+  color: var(--parchment-pale);
+  background-color: #0d0a09;
+  background-image:
+    radial-gradient(ellipse at 50% 15%, rgba(125, 89, 143, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 75% 35%, rgba(242, 97, 45, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(35, 27, 24, 0.9) 0%, rgba(12, 9, 8, 0.98) 70%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+}
+
+/* Textured parchment & sumi-e canvas overlay */
+.sumie-canvas {
+  position: relative;
+}
+
+.sumie-canvas::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(250, 235, 215, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(177, 147, 199, 0.04) 0%, transparent 50%);
+  mix-blend-mode: screen;
+  z-index: -1;
+}
+
+/* Custom Sumi-e Calligraphy Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--calligraphy-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--smoke-sepia);
+  border-radius: 9999px;
+  border: 1px solid rgba(125, 89, 143, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gengar-bright-violet);
+}
+
+/* Sumi-e Ink Wash Panels */
+.sumie-panel {
+  background: rgba(18, 16, 14, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(125, 89, 143, 0.22);
+  box-shadow: 0 10px 35px -5px rgba(12, 9, 8, 0.7), inset 0 1px 1px 0 rgba(250, 235, 215, 0.05);
+}
+
+.sumie-card {
+  background: linear-gradient(145deg, rgba(35, 27, 24, 0.75) 0%, rgba(18, 16, 14, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(125, 89, 143, 0.18);
+  transition: all 0.3s ease;
+}
+
+.sumie-card:hover {
+  border-color: rgba(177, 147, 199, 0.45);
+  box-shadow: 0 0 20px -4px rgba(125, 89, 143, 0.35);
+}

@@ -4,6 +4,7 @@ import { analyzeCoreWebVitals, analyzeGoogleSearchEssentials } from './coreWebVi
 import { analyzeDocumentLinks } from './linkAuditor';
 import { analyzeDeepBugsAndDom } from './deepBugDetector';
 import { simulateDeviceThrottling } from './mobileSimulator';
+import { evaluateUATAcceptance } from './uatAuditor';
 
 export interface SpiderProgressMilestone {
   type: 'log' | 'mobile' | 'batch' | 'page' | 'complete' | 'error';
@@ -58,62 +59,56 @@ export function calculateHealthScore(pageData: {
   return Math.max(0, Math.round(score));
 }
 
-// Helper: Auto-scroll to trigger lazy content
-async function autoScroll(page: any): Promise<void> {
-  await page.evaluate(async () => {
-    await new Promise<void>((resolve) => {
-      let scrolled = 0;
-      const step = 500;
-      const safetyCap = 40000;
-      const timer = setInterval(() => {
-        const h = Math.max(
-          document.body ? document.body.scrollHeight : 0,
-          document.documentElement ? document.documentElement.scrollHeight : 0
-        );
-        window.scrollBy(0, step);
-        scrolled += step;
-        if (scrolled >= h || scrolled >= safetyCap) {
-          clearInterval(timer);
-          window.scrollTo(0, 0);
-          resolve();
-        }
-      }, 80);
-    });
-  });
-}
+// Helper: Wait for page to ACTUALLY fully load, decode assets, resolve fonts, and settle animations
+export async function waitForFullLoadAndSettle(page: any, opts: { settleMs?: number; networkIdleTimeout?: number } = {}): Promise<void> {
+  const settleMs = opts.settleMs ?? 2200;
+  const netTimeout = opts.networkIdleTimeout ?? 8000;
 
-// Helper: Wait for page to fully settle
-async function waitForFullLoad(page: any, opts: { networkIdleTimeout?: number; imageTimeout?: number; settle?: number } = {}): Promise<void> {
-  const netTimeout = opts.networkIdleTimeout ?? 12000;
-  const imgTimeout = opts.imageTimeout ?? 5000;
-
-  await page.waitForLoadState('load').catch(() => {});
+  // 1. Assert navigation load states
+  await page.waitForLoadState('domcontentloaded', { timeout: 30000 }).catch(() => {});
+  await page.waitForLoadState('load', { timeout: 30000 }).catch(() => {});
   await page.waitForLoadState('networkidle', { timeout: netTimeout }).catch(() => {});
-  await autoScroll(page).catch(() => {});
 
-  await page.evaluate(async (timeout: number) => {
+  // 2. Wait for web fonts to resolve and status to be loaded
+  await page.evaluate(async () => {
     if ((document as any).fonts && (document as any).fonts.ready) {
       try {
-        await Promise.race([(document as any).fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+        await Promise.race([(document as any).fonts.ready, new Promise((r) => setTimeout(r, 3500))]);
       } catch {}
     }
-    const imgs = Array.from(document.images);
-    await Promise.all(
-      imgs.map((img) =>
-        img.complete && img.naturalWidth > 0
-          ? Promise.resolve()
-          : new Promise((res) => {
-              img.addEventListener('load', res, { once: true });
-              img.addEventListener('error', res, { once: true });
-              setTimeout(res, timeout);
-            })
-      )
-    );
-  }, imgTimeout).catch(() => {});
+  }).catch(() => {});
 
-  await page.waitForLoadState('networkidle', { timeout: 4000 }).catch(() => {});
-  await page.waitForTimeout(opts.settle ?? 600);
+  // 3. Gentle lazy-loading stroll to trigger IntersectionObservers & decode bitmaps
+  await page.evaluate(async () => {
+    const totalHeight = Math.min(
+      Math.max(document.body ? document.body.scrollHeight : 0, document.documentElement ? document.documentElement.scrollHeight : 0),
+      12000
+    );
+    const viewportH = window.innerHeight || 800;
+    for (let y = 0; y < totalHeight; y += viewportH) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 60));
+    }
+    // Force eager loading on images and trigger .decode() for GPU bitmaps
+    const imgs = Array.from(document.querySelectorAll('img'));
+    for (const img of imgs) {
+      if (img.loading === 'lazy') img.loading = 'eager';
+      if ((img as any).decode) {
+        try {
+          await (img as any).decode();
+        } catch {}
+      }
+    }
+    // Scroll cleanly back to top for pristine visual presentation
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }).catch(() => {});
+
+  // 4. Wait for entrance animations, GSAP/Framer Motion, typewriter effects, and re-layouts to settle
+  await page.waitForTimeout(settleMs);
 }
+
+// Backwards-compatible alias
+export const waitForFullLoad = waitForFullLoadAndSettle;
 
 /**
  * Execute real batched BFS worker pool spider matching audit.js
@@ -218,7 +213,7 @@ export async function runSpiderEngineAudit(
       rootHeaders = mainResponse.headers() || {};
     }
 
-    await waitForFullLoad(rootPage, { settle: 500 });
+    await waitForFullLoadAndSettle(rootPage, { settleMs: 2200 });
     initialHtml = await rootPage.content();
 
     const visitedUrls = new Set<string>();
@@ -379,7 +374,7 @@ export async function runSpiderEngineAudit(
         }
 
         const loadTimeMs = Date.now() - startTime;
-        await waitForFullLoad(workerPage, { settle: 600 });
+        await waitForFullLoadAndSettle(workerPage, { settleMs: 2200 });
 
         const universalMetrics = await workerPage.evaluate(() => {
           const brokenImages = Array.from(document.querySelectorAll('img'))
@@ -417,12 +412,17 @@ export async function runSpiderEngineAudit(
 
         const secScore = Math.max(40, 100 - securityIssues.length * 12);
 
-        // Visual screenshot: compressed JPEG
+        // Visual screenshot: high-fidelity settled JPEG (quality: 80)
         let screenshotDataUri = '';
         try {
-          const shotBuffer = await workerPage.screenshot({ type: 'jpeg', quality: 30, fullPage: true });
+          const shotBuffer = await workerPage.screenshot({ type: 'jpeg', quality: 80, fullPage: true });
           screenshotDataUri = `data:image/jpeg;base64,${shotBuffer.toString('base64')}`;
-        } catch {}
+        } catch {
+          try {
+            const shotBuffer = await workerPage.screenshot({ type: 'jpeg', quality: 80, fullPage: false });
+            screenshotDataUri = `data:image/jpeg;base64,${shotBuffer.toString('base64')}`;
+          } catch {}
+        }
 
         const pageHealth = calculateHealthScore({
           loadTime: loadTimeMs / 1000,
@@ -630,6 +630,19 @@ export async function runSpiderEngineAudit(
       mobileThrottling: simulateDeviceThrottling('budget-2gb', 2.1, 140, 1100),
       spiderArchitecture,
       frontendDiagnostics,
+      uatAcceptance: evaluateUATAcceptance({
+        html: initialHtml,
+        targetUrl,
+        spiderArchitecture,
+        mobileLoadTimeSec: mobNum,
+        mobileFcpMs: parseFloat(mobileFcp) || 1200,
+        securityScore: avgSec,
+        securityFindingsCount: totalSecurityFindings,
+        brokenImagesCount: 0,
+        accessibilityViolationsCount: (frontendDiagnostics?.layoutAndMobile?.touchTargetsSubstandard || 0) + (frontendDiagnostics?.colorPsychology?.apcaContrast?.failingCount || 0),
+        ttfbMs: cwv.ttfb.value,
+        lcpMs: cwv.lcp.value,
+      }),
     };
 
     log(`✨ Spider Engine Crawl Complete! Overall Score: ${overallScore}/100 | ${totalPages} routes audited.`);

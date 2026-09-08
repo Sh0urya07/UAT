@@ -273,6 +273,135 @@ export interface FrontendDiagnosticsReport {
   };
 }
 
+export type UATVerdict = 'GO_FOR_PRODUCTION' | 'CONDITIONAL_ACCEPTANCE' | 'NO_GO_REJECTED';
+
+export type UATStoryStatus = 'passed' | 'failed' | 'blocked' | 'needs-review';
+
+export interface UATUserStory {
+  id: string;
+  category: 'business-alignment' | 'user-workflow' | 'operational-readiness' | 'regulation-compliance' | 'contract-sla';
+  persona: string;
+  story: string;
+  acceptanceCriteria: string[];
+  status: UATStoryStatus;
+  score: number;
+  evidence: string;
+  remediation?: string;
+}
+
+export interface UATOATMetrics {
+  networkResilienceScore: number;
+  gracefulDegradationScore: number;
+  errorRecoveryRating: 'Robust' | 'Substandard' | 'Failing';
+  deviceStarvationRisk: 'Low' | 'Moderate' | 'Critical (Device Freeze)';
+  runtimeStability: {
+    uncaughtErrors: number;
+    failedRequests: number;
+    heavyAssetsCount: number;
+  };
+}
+
+export interface UATComplianceMatrix {
+  wcagLegalMandate: {
+    status: 'Compliant' | 'Partial Non-Compliance' | 'Critical Liability';
+    violationsCount: number;
+    criticalViolations: string[];
+  };
+  privacyAndConsent: {
+    hasPrivacyPolicy: boolean;
+    hasTerms: boolean;
+    cookieConsentDetected: boolean;
+    gdprRisk: 'Low' | 'Moderate' | 'High';
+  };
+  dataIntegrityAndSsl: {
+    httpsEnforced: boolean;
+    hstsActive: boolean;
+    formInputsSecured: boolean;
+  };
+}
+
+export interface UATContractSlaItem {
+  metric: string;
+  targetSla: string;
+  actualObserved: string;
+  status: 'met' | 'breached' | 'warning';
+}
+
+export interface UATSignOffStakeholder {
+  role: 'Product Owner / Client' | 'Lead QA Architect' | 'Systems & Security Lead' | 'Compliance Officer';
+  name: string;
+  status: 'Approved' | 'Conditional' | 'Pending Resolution' | 'Rejected';
+  notes: string;
+  timestamp?: string;
+}
+
+export interface UATEnvironmentContext {
+  isStaging: boolean;
+  environmentTier: 'ultra-uat' | 'staging' | 'pre-production' | 'production-candidate';
+  environmentUrl: string;
+  detectionReason: string;
+}
+
+export interface UATDomIntegrity {
+  score: number;
+  totalNodes: number;
+  maxDepth: number;
+  duplicateIds: string[];
+  missingAriaAttributes: number;
+  hydrationRisk: 'low' | 'moderate' | 'critical';
+  issues: string[];
+}
+
+export interface UATUserJourney {
+  id: string;
+  name: string;
+  persona: string;
+  journeySteps: string[];
+  status: 'passed' | 'failed' | 'needs-review';
+  simulatedInteractions: number;
+  timeToCompleteMs: number;
+  notes: string;
+}
+
+export interface UATDefectLogging {
+  totalConsoleErrors: number;
+  totalFailedNetworkRequests: number;
+  totalBrokenLinks: number;
+  criticalBlockers: number;
+  items: Array<{
+    type: 'console-error' | 'network-failure' | 'broken-link' | 'security-misconfig' | 'layout-regression';
+    message: string;
+    severity: 'critical' | 'high' | 'medium';
+    source?: string;
+  }>;
+}
+
+export interface UATAcceptanceReport {
+  overallVerdict: UATVerdict;
+  verdict: UATVerdict;
+  overallReadinessScore: number;
+  readinessScore: number;
+  businessAlignmentScore: number;
+  operationalReadinessScore: number;
+  complianceScore: number;
+  contractSlaScore: number;
+
+  // 4 Core Advanced UAT Focus Areas
+  environmentContext: UATEnvironmentContext;
+  domIntegrity: UATDomIntegrity;
+  userJourneys: UATUserJourney[];
+  defectLogging: UATDefectLogging;
+
+  signOffSummary: string;
+  blockersCount: number;
+  criticalDefectsCount: number;
+  userStories: UATUserStory[];
+  oatMetrics: UATOATMetrics;
+  complianceMatrix: UATComplianceMatrix;
+  stakeholders: UATSignOffStakeholder[];
+  contractSlaChecklist: UATContractSlaItem[];
+}
+
 export interface AuditReport {
   id: string;
   timestamp: string;
@@ -287,6 +416,7 @@ export interface AuditReport {
     securityPosture: number;
     codeAndDomHealth: number;
     frontendAndUx?: number;
+    uatReadiness?: number;
   };
   coreWebVitals: {
     lcp: CoreWebVitalsMetric;
@@ -311,5 +441,6 @@ export interface AuditReport {
   mobileThrottling: PerformanceThrottlingProfile;
   spiderArchitecture?: SpiderArchitectureReport;
   frontendDiagnostics?: FrontendDiagnosticsReport;
+  uatAcceptance?: UATAcceptanceReport;
   screenshot?: string;
 }

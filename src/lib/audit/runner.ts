@@ -6,6 +6,7 @@ import { simulateDeviceThrottling } from './mobileSimulator';
 import { analyzeFrontendAndUiUx } from './frontendAuditor';
 import { runSpiderCrawler, UNOVA_MULTIPAGE_BENCHMARK } from './spiderCrawler';
 import { DEMO_PRESETS } from './presets';
+import { evaluateUATAcceptance } from './uatAuditor';
 import { AuditReport, CrawlScope, SpiderArchitectureReport, FrontendDiagnosticsReport } from './types';
 
 export async function runCompleteAudit(
@@ -209,5 +210,18 @@ export async function runCompleteAudit(
     mobileThrottling,
     spiderArchitecture,
     frontendDiagnostics,
+    uatAcceptance: evaluateUATAcceptance({
+      html,
+      targetUrl,
+      spiderArchitecture,
+      mobileLoadTimeSec: mobileThrottling.simulation.totalLoadTimeSec,
+      mobileFcpMs: Math.round(cwv.fcp.value * 1000 * mobileThrottling.simulation.lcpMultiplier),
+      securityScore,
+      securityFindingsCount: security.findings.length,
+      brokenImagesCount: 0,
+      accessibilityViolationsCount: (frontendDiagnostics?.layoutAndMobile?.touchTargetsSubstandard || 0) + (frontendDiagnostics?.colorPsychology?.apcaContrast?.failingCount || 0),
+      ttfbMs: Math.round(cwv.ttfb.value * 1000),
+      lcpMs: Math.round(cwv.lcp.value * 1000),
+    }),
   };
 }

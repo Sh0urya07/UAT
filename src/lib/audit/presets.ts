@@ -1,6 +1,34 @@
 import { AuditReport } from './types';
 import { simulateDeviceThrottling } from './mobileSimulator';
 import { UNOVA_MULTIPAGE_BENCHMARK } from './spiderCrawler';
+import { evaluateUATAcceptance } from './uatAuditor';
+
+const UNOVA_ROOT_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Unova | Engineering Firm for High-Performance Websites & Systems</title>
+  <meta name="description" content="Unova is an engineering firm for teams who need the surface to be beautiful and the substructure to be correct. Websites, applications, internal systems, AI integration.">
+  <link rel="canonical" href="https://unova.co.in">
+</head>
+<body>
+  <header>
+    <a href="/about">About</a>
+    <a href="/services">Services</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/contact">Start a project</a>
+  </header>
+  <main>
+    <h1>We build what people are searching for.</h1>
+    <p>Unova is an engineering firm for teams who need the surface to be beautiful and the substructure to be correct.</p>
+    <a href="/contact" class="btn-primary">Start a project</a>
+    <a href="/showcase" class="btn-secondary">See the work</a>
+  </main>
+  <footer>
+    <a href="/privacy-policy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+  </footer>
+</body>
+</html>`;
 
 export const DEMO_PRESETS: Record<string, AuditReport> = {
   'unova-benchmark': {
@@ -339,6 +367,19 @@ export const DEMO_PRESETS: Record<string, AuditReport> = {
         issues: [],
       },
     },
+    uatAcceptance: evaluateUATAcceptance({
+      html: UNOVA_ROOT_HTML,
+      targetUrl: 'https://unova.co.in',
+      spiderArchitecture: UNOVA_MULTIPAGE_BENCHMARK,
+      mobileLoadTimeSec: 3.12,
+      mobileFcpMs: 1230,
+      securityScore: 66,
+      securityFindingsCount: 6,
+      brokenImagesCount: 0,
+      accessibilityViolationsCount: 1,
+      ttfbMs: 340,
+      lcpMs: 2450,
+    }),
   },
   'nextjs-saas': {
     id: 'preset-nextjs-saas',

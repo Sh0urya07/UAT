@@ -7,6 +7,7 @@ import { HeroAuditInput } from '@/components/HeroAuditInput';
 import { AuditDashboard } from '@/components/AuditDashboard';
 import { ThreeCanvasBackground } from '@/components/ThreeCanvasBackground';
 import { SpiderTerminalConsole, TerminalLogEntry } from '@/components/SpiderTerminalConsole';
+import { AuditWaitingAnimation } from '@/components/AuditWaitingAnimation';
 import { DEMO_PRESETS } from '@/lib/audit/presets';
 import { AuditReport, CrawlScope, SpiderPageNode } from '@/lib/audit/types';
 import { Sparkles, Shield, Cpu, ExternalLink, Terminal, ChevronDown, ChevronUp } from 'lucide-react';
@@ -15,6 +16,7 @@ import confetti from 'canvas-confetti';
 export default function HomePage() {
   const [report, setReport] = useState<AuditReport>(DEMO_PRESETS['unova-benchmark'] || DEMO_PRESETS['nextjs-saas']);
   const [isLoading, setIsLoading] = useState(false);
+  const [auditingUrl, setAuditingUrl] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [terminalLogs, setTerminalLogs] = useState<TerminalLogEntry[]>([]);
   const [currentBatch, setCurrentBatch] = useState<{
@@ -90,17 +92,17 @@ export default function HomePage() {
     crawlScope: CrawlScope = 'multi-page-spider',
     maxPages?: number
   ) => {
+    const tokens = url.trim().split(/\s+/);
+    const cleanUrl = tokens[0];
+    const parsedBudget = tokens[1] ? parseInt(tokens[1], 10) : undefined;
+    const effectiveMaxPages = maxPages || parsedBudget;
+
+    setAuditingUrl(cleanUrl);
     setIsLoading(true);
     setShowTerminal(true);
     setRecentPages([]);
     setCurrentBatch(undefined);
     setMobileProfile(undefined);
-
-    // Auto-parse space-delimited budget like "https://amazon.com 5000"
-    const tokens = url.trim().split(/\s+/);
-    const cleanUrl = tokens[0];
-    const parsedBudget = tokens[1] ? parseInt(tokens[1], 10) : undefined;
-    const effectiveMaxPages = maxPages || parsedBudget;
 
     const nowStr = () =>
       new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -274,36 +276,73 @@ export default function HomePage() {
           onSelectPreset={handleSelectPreset}
         />
 
-        {/* Live Spider Terminal Console Toggle Button */}
-        {(terminalLogs.length > 0 || isLoading) && (
-          <div className="flex items-center justify-center">
-            <button
-              type="button"
-              onClick={() => setShowTerminal(!showTerminal)}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-900 text-stone-200 hover:bg-stone-800 text-xs font-mono transition-all shadow-md"
-            >
-              <Terminal className="w-3.5 h-3.5 text-violet-400" />
-              <span>{showTerminal ? 'Hide Live Terminal Telemetry' : 'Show Live Terminal Telemetry'}</span>
-              {showTerminal ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </button>
+        {/* While Auditing: WAIT FOR WHOLE AUDIT TO FINISH and display the animated waiting experience */}
+        {isLoading ? (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <AuditWaitingAnimation
+              targetUrl={auditingUrl || 'Target Route'}
+              logs={terminalLogs}
+              currentBatch={currentBatch}
+              mobileProfile={mobileProfile}
+              recentPagesCount={recentPages.length}
+            />
+
+            {/* Optional Live Telemetry Strip */}
+            <div className="flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => setShowTerminal(!showTerminal)}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-900 text-stone-200 hover:bg-stone-800 text-xs font-mono transition-all shadow-md"
+              >
+                <Terminal className="w-3.5 h-3.5 text-violet-400" />
+                <span>{showTerminal ? 'Hide Raw Streaming Logs' : 'Show Raw Streaming Logs'}</span>
+                {showTerminal ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {showTerminal && (
+              <SpiderTerminalConsole
+                logs={terminalLogs}
+                currentBatch={currentBatch}
+                mobileProfile={mobileProfile}
+                recentPages={recentPages}
+                isAuditing={true}
+              />
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Live Spider Terminal Console Toggle Button (post-audit or preset) */}
+            {terminalLogs.length > 0 && (
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowTerminal(!showTerminal)}
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-900 text-stone-200 hover:bg-stone-800 text-xs font-mono transition-all shadow-md"
+                >
+                  <Terminal className="w-3.5 h-3.5 text-violet-400" />
+                  <span>{showTerminal ? 'Hide Execution Telemetry' : 'Show Execution Telemetry'}</span>
+                  {showTerminal ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            )}
+
+            {showTerminal && terminalLogs.length > 0 && (
+              <SpiderTerminalConsole
+                logs={terminalLogs}
+                currentBatch={currentBatch}
+                mobileProfile={mobileProfile}
+                recentPages={recentPages}
+                isAuditing={false}
+              />
+            )}
+
+            {/* Final Completed Audit Dashboard with Animated Container */}
+            <div ref={dashboardRef} className="animate-in fade-in duration-500">
+              <AuditDashboard report={report} onExportSarif={handleExportSarif} />
+            </div>
           </div>
         )}
-
-        {/* Live Spider Terminal Console */}
-        {(showTerminal || isLoading) && (
-          <SpiderTerminalConsole
-            logs={terminalLogs}
-            currentBatch={currentBatch}
-            mobileProfile={mobileProfile}
-            recentPages={recentPages}
-            isAuditing={isLoading}
-          />
-        )}
-
-        {/* Audit Dashboard with Animated Container */}
-        <div ref={dashboardRef}>
-          <AuditDashboard report={report} onExportSarif={handleExportSarif} />
-        </div>
       </main>
 
       {/* Enterprise Footer */}

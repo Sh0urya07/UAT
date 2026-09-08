@@ -10,6 +10,7 @@ import { VulnerabilityTree } from './VulnerabilityTree';
 import { SpiderArchitecturePanel } from './SpiderArchitecturePanel';
 import { ColorPsychologyPanel } from './ColorPsychologyPanel';
 import { TypographyLayoutPanel } from './TypographyLayoutPanel';
+import { UATAcceptancePanel } from './UATAcceptancePanel';
 import { AuditReport } from '@/lib/audit/types';
 import {
   Layers,
@@ -22,6 +23,7 @@ import {
   Palette,
   Type,
   Sparkles,
+  FileCheck,
 } from 'lucide-react';
 
 interface AuditDashboardProps {
@@ -31,8 +33,8 @@ interface AuditDashboardProps {
 
 export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
   const [activeTab, setActiveTab] = useState<
-    'spider' | 'color' | 'typography' | 'cwv' | 'links' | 'throttler' | 'bugs'
-  >(report.spiderArchitecture ? 'spider' : 'color');
+    'uat' | 'spider' | 'color' | 'typography' | 'cwv' | 'links' | 'throttler' | 'bugs'
+  >(report.uatAcceptance ? 'uat' : (report.spiderArchitecture ? 'spider' : 'color'));
   const tabContentRef = useRef<HTMLDivElement>(null);
   const scoreContainerRef = useRef<HTMLDivElement>(null);
 
@@ -90,6 +92,36 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
             {report.spiderArchitecture && (
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-50 text-violet-800 border border-violet-300 font-bold">
                 {report.spiderArchitecture.totalPagesCrawled} ROUTES
+              </span>
+            )}
+            {report.uatAcceptance && (
+              <span
+                className={`text-[10px] font-mono px-2.5 py-0.5 rounded font-bold border flex items-center gap-1.5 ${
+                  (report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'GO_FOR_PRODUCTION'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : (report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'CONDITIONAL_ACCEPTANCE'
+                    ? 'bg-amber-50 text-amber-800 border-amber-300'
+                    : 'bg-rose-50 text-rose-800 border-rose-300'
+                }`}
+              >
+                <span>
+                  {(report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'GO_FOR_PRODUCTION'
+                    ? '🟢'
+                    : (report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'CONDITIONAL_ACCEPTANCE'
+                    ? '🟡'
+                    : '🔴'}
+                </span>
+                <span>
+                  UAT:{' '}
+                  {(report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'GO_FOR_PRODUCTION'
+                    ? 'GO FOR PRODUCTION'
+                    : (report.uatAcceptance.overallVerdict || report.uatAcceptance.verdict) === 'CONDITIONAL_ACCEPTANCE'
+                    ? 'CONDITIONAL SIGN-OFF'
+                    : 'NO-GO REJECTED'}
+                </span>
+                <span className="opacity-75 font-semibold">
+                  ({report.uatAcceptance.overallReadinessScore ?? report.uatAcceptance.readinessScore}/100)
+                </span>
               </span>
             )}
           </div>
@@ -162,6 +194,23 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
 
       {/* Clean Navigation Tabs */}
       <div className="flex border-b border-stone-300/80 gap-2 overflow-x-auto pb-1 scrollbar-thin">
+        <button
+          onClick={() => setActiveTab('uat')}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+            activeTab === 'uat'
+              ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
+          }`}
+        >
+          <FileCheck className={`w-3.5 h-3.5 ${activeTab === 'uat' ? 'text-emerald-400' : 'text-stone-500'}`} />
+          <span>
+            UAT Sign-Off{' '}
+            {report.uatAcceptance
+              ? `(${report.uatAcceptance.overallReadinessScore ?? report.uatAcceptance.readinessScore}%)`
+              : ''}
+          </span>
+        </button>
+
         <button
           onClick={() => setActiveTab('spider')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
@@ -249,6 +298,7 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
 
       {/* Tab Panels */}
       <div ref={tabContentRef}>
+        {activeTab === 'uat' && <UATAcceptancePanel uat={report.uatAcceptance} targetUrl={report.targetUrl} />}
         {activeTab === 'spider' && <SpiderArchitecturePanel spider={report.spiderArchitecture} targetUrl={report.targetUrl} />}
         {activeTab === 'color' && <ColorPsychologyPanel diagnostics={report.frontendDiagnostics} />}
         {activeTab === 'typography' && <TypographyLayoutPanel diagnostics={report.frontendDiagnostics} />}

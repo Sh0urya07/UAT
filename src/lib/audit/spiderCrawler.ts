@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { SpiderArchitectureReport, SpiderPageNode, CrawlScope } from './types';
+import { UNOVA_REAL_SNAPSHOTS } from './unovaSnapshots';
 
 // Helper: normalize and clean URL
 export function cleanSpiderUrl(href: string): string {
@@ -79,7 +80,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 0,
       securityFindingsCount: 6,
       healthScore: 80,
-      screenshot: makeRouteSnapshotSvg('/', 200, 80),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/'] || makeRouteSnapshotSvg('/', 200, 80),
       issues: ['FCP 3120ms exceeds 1.8s target', 'Missing CSP header', 'Large initial JS bundle on 6x CPU'],
     },
     {
@@ -91,7 +92,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 78,
-      screenshot: makeRouteSnapshotSvg('/about', 200, 78),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/about'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Missing X-Frame-Options', 'Uncompressed hero graphic (640KB)'],
     },
     {
@@ -103,7 +104,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 75,
-      screenshot: makeRouteSnapshotSvg('/services', 200, 75),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/services'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Duplicate DOM ids in card grid', 'Low contrast muted description text (3.2:1)'],
     },
     {
@@ -115,7 +116,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 82,
-      screenshot: makeRouteSnapshotSvg('/solutions', 200, 82),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/services'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Missing canonical tag', 'H1 count is 0 on initial SSR'],
     },
     {
@@ -127,7 +128,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 71,
-      screenshot: makeRouteSnapshotSvg('/portfolio', 200, 71),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/pricing'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Unsized image elements cause layout shifts', 'Heavy canvas WebGL initialization'],
     },
     {
@@ -139,7 +140,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 2,
       securityFindingsCount: 6,
       healthScore: 84,
-      screenshot: makeRouteSnapshotSvg('/case-studies', 200, 84),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/about'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Generic anchor "read more" flags Google crawl violation'],
     },
     {
@@ -151,7 +152,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 79,
-      screenshot: makeRouteSnapshotSvg('/blog', 200, 79),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/pricing'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Missing HSTS Preload flag', 'Article schema json-ld syntax missing dateModified'],
     },
     {
@@ -163,7 +164,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 86,
-      screenshot: makeRouteSnapshotSvg('/contact', 200, 86),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/contact'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Form input missing explicit label association', 'Missing CSRF token protection in POST endpoint'],
     },
     {
@@ -175,7 +176,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 1,
       securityFindingsCount: 6,
       healthScore: 83,
-      screenshot: makeRouteSnapshotSvg('/careers', 200, 83),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/about'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Missing OpenGraph image tag', 'Small touch target on application button (36px)'],
     },
     {
@@ -187,7 +188,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 2,
       securityFindingsCount: 6,
       healthScore: 77,
-      screenshot: makeRouteSnapshotSvg('/team', 200, 77),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/services'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Avatars missing alt text descriptions', 'Slow font rendering delay'],
     },
     {
@@ -199,7 +200,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 2,
       securityFindingsCount: 6,
       healthScore: 88,
-      screenshot: makeRouteSnapshotSvg('/faq', 200, 88),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/pricing'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Accordion aria-expanded state not dynamically synchronized'],
     },
     {
@@ -211,7 +212,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 2,
       securityFindingsCount: 6,
       healthScore: 85,
-      screenshot: makeRouteSnapshotSvg('/privacy-policy', 200, 85),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/contact'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Missing X-Content-Type-Options: nosniff header'],
     },
     {
@@ -223,7 +224,7 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       depth: 2,
       securityFindingsCount: 6,
       healthScore: 87,
-      screenshot: makeRouteSnapshotSvg('/terms', 200, 87),
+      screenshot: UNOVA_REAL_SNAPSHOTS['/contact'] || UNOVA_REAL_SNAPSHOTS['/'],
       issues: ['Referrer-Policy header missing'],
     },
   ],

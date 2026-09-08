@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { SpiderArchitectureReport } from '@/lib/audit/types';
+import React, { useState } from 'react';
+import { SpiderArchitectureReport, SpiderPageNode } from '@/lib/audit/types';
 import {
   Network,
   AlertTriangle,
@@ -13,6 +13,10 @@ import {
   Flame,
   Clock,
   Smartphone,
+  Image,
+  X,
+  ExternalLink,
+  Maximize2,
 } from 'lucide-react';
 
 interface SpiderArchitecturePanelProps {
@@ -21,6 +25,8 @@ interface SpiderArchitecturePanelProps {
 }
 
 export function SpiderArchitecturePanel({ spider, targetUrl }: SpiderArchitecturePanelProps) {
+  const [selectedSnapshot, setSelectedSnapshot] = useState<SpiderPageNode | null>(null);
+
   if (!spider) {
     return (
       <div className="p-8 rounded-xl bg-white/90 border border-stone-200 text-center space-y-3 backdrop-blur-md">
@@ -115,7 +121,7 @@ export function SpiderArchitecturePanel({ spider, targetUrl }: SpiderArchitectur
         </div>
       </div>
 
-      {/* Crawled Route Tree Table */}
+      {/* Crawled Route Tree Table with Visual Snapshot Previews */}
       <div className="rounded-xl bg-white/90 border border-stone-200 shadow-sm overflow-hidden backdrop-blur-md">
         <div className="px-5 py-3 border-b border-stone-200 bg-stone-50/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -124,35 +130,60 @@ export function SpiderArchitecturePanel({ spider, targetUrl }: SpiderArchitectur
               Autonomous Spider Route Hierarchy ({spider.pages.length} Pages)
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-stone-500">Breadth-First Search (BFS)</span>
+          <span className="text-[11px] font-mono text-stone-500">Breadth-First Search (BFS) & Full-Page Visual Snapshots</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead className="bg-stone-100/70 text-stone-600 border-b border-stone-200">
               <tr>
-                <th className="px-4 py-2.5">Path</th>
+                <th className="px-4 py-2.5">Path & Route</th>
+                <th className="px-3 py-2.5">Snapshot</th>
                 <th className="px-3 py-2.5">Status</th>
                 <th className="px-3 py-2.5">Depth</th>
                 <th className="px-3 py-2.5">Size</th>
                 <th className="px-3 py-2.5">Latency</th>
-                <th className="px-3 py-2.5">Security Issues</th>
+                <th className="px-3 py-2.5">Security</th>
                 <th className="px-4 py-2.5">Key Findings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-200 text-stone-800">
               {spider.pages.map((p, idx) => (
                 <tr key={idx} className="hover:bg-stone-50/80 transition-colors">
-                  <td className="px-4 py-2.5 font-bold text-stone-900 flex items-center gap-1.5">
-                    <span className="text-stone-400">{'—'.repeat(p.depth)}</span>
-                    <a href={p.url} target="_blank" rel="noreferrer" className="hover:underline text-stone-900">
-                      {p.path}
-                    </a>
+                  <td className="px-4 py-2.5 font-bold text-stone-900">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-stone-400">{'—'.repeat(p.depth)}</span>
+                      <a href={p.url} target="_blank" rel="noreferrer" className="hover:underline text-stone-900">
+                        {p.path}
+                      </a>
+                    </div>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      p.status === 200 ? 'bg-emerald-50 text-emerald-800 border border-emerald-300' : 'bg-red-50 text-red-800 border border-red-300'
-                    }`}>
+                    {p.screenshot ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSnapshot(p)}
+                        className="group flex items-center gap-1.5 px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 border border-stone-300 text-[10px] text-stone-700 hover:text-stone-900 transition-all"
+                        title="View Full-Page Render Snapshot"
+                      >
+                        <div className="w-5 h-5 rounded overflow-hidden bg-stone-200 shrink-0 border border-stone-300">
+                          <img src={p.screenshot} alt={p.path} className="w-full h-full object-cover object-top" />
+                        </div>
+                        <span className="font-semibold">Snapshot</span>
+                        <Maximize2 className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-stone-400 italic">No snapshot</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        p.status === 200
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                          : 'bg-red-50 text-red-800 border border-red-300'
+                      }`}
+                    >
                       {p.status}
                     </span>
                   </td>
@@ -164,15 +195,84 @@ export function SpiderArchitecturePanel({ spider, targetUrl }: SpiderArchitectur
                       {p.securityFindingsCount} issues
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-stone-600 max-w-xs truncate">
-                    {p.issues.join(' • ')}
-                  </td>
+                  <td className="px-4 py-2.5 text-stone-600 max-w-xs truncate">{p.issues.join(' • ')}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Snapshot Preview Modal */}
+      {selectedSnapshot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-stone-300 flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-5 py-3.5 bg-stone-900 text-white flex items-center justify-between select-none">
+              <div className="flex items-center gap-2 font-mono text-xs truncate">
+                <Image className="w-4 h-4 text-violet-400 shrink-0" />
+                <span className="font-bold text-stone-100 truncate">{selectedSnapshot.path}</span>
+                <span className="text-stone-400 truncate">({selectedSnapshot.url})</span>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                    selectedSnapshot.status === 200 ? 'bg-emerald-950 text-emerald-300' : 'bg-red-950 text-red-300'
+                  }`}
+                >
+                  HTTP {selectedSnapshot.status}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <a
+                  href={selectedSnapshot.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-stone-300 hover:text-white flex items-center gap-1 font-mono"
+                >
+                  <span>Open URL</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSnapshot(null)}
+                  className="p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Meta Bar */}
+            <div className="px-5 py-2.5 bg-stone-100 border-b border-stone-200 flex items-center justify-between text-xs font-mono text-stone-700">
+              <div className="flex items-center gap-4">
+                <span>
+                  Load Time: <strong>{selectedSnapshot.loadTimeMs}ms</strong>
+                </span>
+                <span>
+                  Page Size: <strong>{selectedSnapshot.sizeKb} KB</strong>
+                </span>
+                <span>
+                  Route Depth: <strong>Level {selectedSnapshot.depth}</strong>
+                </span>
+              </div>
+              <div className="text-stone-500 text-[11px]">Full-page render capture (settled)</div>
+            </div>
+
+            {/* Modal Image Body */}
+            <div className="flex-1 overflow-y-auto p-4 bg-stone-50 text-center">
+              {selectedSnapshot.screenshot ? (
+                <img
+                  src={selectedSnapshot.screenshot}
+                  alt={`Full page render of ${selectedSnapshot.path}`}
+                  className="max-w-full mx-auto rounded-lg border border-stone-300 shadow-md"
+                />
+              ) : (
+                <div className="p-12 text-stone-500 font-mono text-xs">No screenshot buffer available for this route.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

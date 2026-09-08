@@ -9,7 +9,8 @@ interface HeroAuditInputProps {
   onRunAudit: (
     url: string,
     throttlingProfile: 'desktop' | 'mid-mobile' | 'budget-2gb',
-    crawlScope: CrawlScope
+    crawlScope: CrawlScope,
+    maxPages?: number
   ) => void;
   isLoading: boolean;
   onSelectPreset: (presetKey: string) => void;
@@ -18,7 +19,8 @@ interface HeroAuditInputProps {
 export function HeroAuditInput({ onRunAudit, isLoading, onSelectPreset }: HeroAuditInputProps) {
   const [urlInput, setUrlInput] = useState('');
   const [crawlScope, setCrawlScope] = useState<CrawlScope>('multi-page-spider');
-  const [loadingStep, setLoadingStep] = useState('Initializing Unova Spider engine...');
+  const [crawlBudget, setCrawlBudget] = useState<number | 'auto'>('auto');
+  const [loadingStep, setLoadingStep] = useState('Initializing Spider Engine...');
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -58,7 +60,18 @@ export function HeroAuditInput({ onRunAudit, isLoading, onSelectPreset }: HeroAu
       setLoadingStep(steps[stepIdx]);
     }, 1100);
 
-    onRunAudit(urlInput.trim(), 'budget-2gb', crawlScope);
+    // Auto-parse space-delimited budget like "https://amazon.com 5000"
+    const tokens = urlInput.trim().split(/\s+/);
+    const targetUrl = tokens[0];
+    let effectiveBudget = crawlBudget === 'auto' ? undefined : crawlBudget;
+    if (tokens[1]) {
+      const parsed = parseInt(tokens[1], 10);
+      if (!isNaN(parsed)) {
+        effectiveBudget = parsed;
+      }
+    }
+
+    onRunAudit(targetUrl, 'budget-2gb', crawlScope, effectiveBudget);
     setTimeout(() => clearInterval(interval), 14000);
   };
 
@@ -73,39 +86,67 @@ export function HeroAuditInput({ onRunAudit, isLoading, onSelectPreset }: HeroAu
       </div>
 
       <h1 className="hero-title text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900 mb-2 select-none">
-        Unova // Spider Engine
+        Spider Engine
       </h1>
       <p className="hero-subtitle text-xs sm:text-sm text-stone-600 max-w-xl mx-auto mb-5">
         Autonomous BFS site topology crawls, cognitive frontend & UI/UX diagnostics (APCA, Bourne &apos;26, Kobayashi scales), and systemic 2GB RAM / 6x CPU hardware throttling.
       </p>
 
-      {/* Crawl Scope Mode Selector */}
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <button
-          type="button"
-          onClick={() => setCrawlScope('multi-page-spider')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-            crawlScope === 'multi-page-spider'
-              ? 'bg-stone-900 text-white shadow-sm border border-stone-900'
-              : 'bg-white/80 text-stone-700 hover:bg-white border border-stone-300'
-          }`}
-        >
-          <Network className="w-3.5 h-3.5 text-violet-400" />
-          <span>Deep Spider Crawl (Multi-Page)</span>
-        </button>
+      {/* Crawl Scope Mode Selector & Budget */}
+      <div className="flex flex-col items-center justify-center gap-2.5 mb-4">
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCrawlScope('multi-page-spider')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              crawlScope === 'multi-page-spider'
+                ? 'bg-stone-900 text-white shadow-sm border border-stone-900'
+                : 'bg-white/80 text-stone-700 hover:bg-white border border-stone-300'
+            }`}
+          >
+            <Network className="w-3.5 h-3.5 text-violet-400" />
+            <span>Deep Spider Crawl (Multi-Page)</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setCrawlScope('single-page')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
-            crawlScope === 'single-page'
-              ? 'bg-stone-900 text-white shadow-sm border border-stone-900'
-              : 'bg-white/80 text-stone-700 hover:bg-white border border-stone-300'
-          }`}
-        >
-          <Zap className="w-3.5 h-3.5 text-amber-500" />
-          <span>Fast Single-Page Probe</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setCrawlScope('single-page')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              crawlScope === 'single-page'
+                ? 'bg-stone-900 text-white shadow-sm border border-stone-900'
+                : 'bg-white/80 text-stone-700 hover:bg-white border border-stone-300'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <span>Fast Single-Page Probe</span>
+          </button>
+        </div>
+
+        {crawlScope === 'multi-page-spider' && (
+          <div className="flex items-center gap-1.5 text-xs font-mono text-stone-500 bg-stone-100/80 px-2.5 py-1 rounded-full border border-stone-200 shadow-2xs">
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Crawl Budget:</span>
+            {[
+              { label: 'Auto', val: 'auto' },
+              { label: '25', val: 25 },
+              { label: '50', val: 50 },
+              { label: '150 (Ceiling)', val: 150 },
+              { label: '5000', val: 5000 },
+            ].map((b) => (
+              <button
+                key={String(b.val)}
+                type="button"
+                onClick={() => setCrawlBudget(b.val as any)}
+                className={`px-2 py-0.5 rounded text-[11px] font-mono transition-all ${
+                  crawlBudget === b.val
+                    ? 'bg-stone-900 text-white font-bold shadow-xs'
+                    : 'bg-white hover:bg-stone-200 text-stone-600 border border-stone-200'
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Clean Input Command Bar with Holographic Scanline */}
@@ -123,7 +164,7 @@ export function HeroAuditInput({ onRunAudit, isLoading, onSelectPreset }: HeroAu
                 type="text"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="Enter URL (e.g. unova.co.in or stripe.com)"
+                placeholder="Enter URL (e.g. amazon.com or unova.co.in 5000)"
                 className="w-full bg-transparent text-sm text-stone-900 placeholder-stone-400 focus:outline-none font-mono"
                 disabled={isLoading}
               />

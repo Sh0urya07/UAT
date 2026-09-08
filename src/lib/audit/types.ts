@@ -182,6 +182,8 @@ export interface SpiderPageNode {
   sizeKb: number;
   depth: number;
   securityFindingsCount: number;
+  healthScore?: number;
+  screenshot?: string;
   issues: string[];
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "Unova // Spider Engine",
-  "short_name": "Unova Spider",
-  "description": "Official Unova Spider Diagnostics & Multi-Page Architecture Suite",
+  "name": "Spider Engine",
+  "short_name": "Spider Engine",
+  "description": "Spider Engine Diagnostics & Multi-Page Architecture Suite",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4ece1",

@@ -9,16 +9,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'Unova // Spider Engine - UI/UX, Cognitive Frontend & Multi-Page Auditor (spider.unova.co.in)',
-    template: '%s | Unova Spider Engine',
+    default: 'Spider Engine - UI/UX, Cognitive Frontend & Multi-Page Auditor (spider.unova.co.in)',
+    template: '%s | Spider Engine',
   },
   description:
-    'Official Unova Spider Diagnostic Suite: High-performance cognitive frontend & multi-page site architecture auditor evaluating UI/UX aesthetics, color psychology (WCAG & APCA), typography hierarchy, mobile ergonomics, Core Web Vitals, and systemic web security.',
-  applicationName: 'Unova Spider Engine',
-  authors: [{ name: 'Unova Engineering', url: 'https://spider.unova.co.in' }],
+    'Spider Engine Diagnostic Suite: High-performance cognitive frontend & multi-page site architecture auditor evaluating UI/UX aesthetics, color psychology (WCAG & APCA), typography hierarchy, mobile ergonomics, Core Web Vitals, and systemic web security.',
+  applicationName: 'Spider Engine',
+  authors: [{ name: 'Engineering', url: 'https://spider.unova.co.in' }],
   generator: 'Next.js',
   keywords: [
-    'Unova',
     'Spider Engine',
     'spider.unova.co.in',
     'UI/UX Auditor',
@@ -49,17 +48,17 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Unova // Spider Engine - Cognitive Frontend & Multi-Page Auditor',
+    title: 'Spider Engine - Cognitive Frontend & Multi-Page Auditor',
     description:
-      'Official Unova Spider Diagnostic Suite: Automated multi-page site architecture crawler and frontend diagnostic suite evaluating UI/UX aesthetics, color psychology, typography, Core Web Vitals, and systemic security posture.',
+      'Spider Engine Diagnostic Suite: Automated multi-page site architecture crawler and frontend diagnostic suite evaluating UI/UX aesthetics, color psychology, typography, Core Web Vitals, and systemic security posture.',
     url: 'https://spider.unova.co.in',
-    siteName: 'Unova Spider Engine',
+    siteName: 'Spider Engine',
     images: [
       {
         url: '/unova-logo.png',
         width: 512,
         height: 512,
-        alt: 'Unova Spider Engine Robot Mascot',
+        alt: 'Spider Engine Robot Mascot',
       },
     ],
     locale: 'en_US',
@@ -67,8 +66,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Unova // Spider Engine - Cognitive Frontend & Multi-Page Auditor',
-    description: 'Autonomous multi-page architecture and frontend UI/UX diagnostic suite by Unova (spider.unova.co.in).',
+    title: 'Spider Engine - Cognitive Frontend & Multi-Page Auditor',
+    description: 'Autonomous multi-page architecture and frontend UI/UX diagnostic suite (spider.unova.co.in).',
     images: ['/unova-logo.png'],
   },
 };

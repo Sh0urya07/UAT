@@ -21,6 +21,39 @@ export function isInternalLink(href: string, baseOrigin: string): boolean {
   }
 }
 
+// Helper: generate realistic settled route preview SVG
+export function makeRouteSnapshotSvg(path: string, status: number = 200, healthScore: number = 80): string {
+  const title = path === '/' ? 'Home Route' : path.replace(/^\//, '').replace(/-/g, ' ').toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+    <rect width="1280" height="800" fill="#0f172a"/>
+    <rect x="0" y="0" width="1280" height="48" fill="#1e293b"/>
+    <circle cx="24" cy="24" r="6" fill="#ef4444"/>
+    <circle cx="44" cy="24" r="6" fill="#f59e0b"/>
+    <circle cx="64" cy="24" r="6" fill="#10b981"/>
+    <rect x="100" y="10" width="480" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="120" y="29" fill="#94a3b8" font-family="monospace" font-size="13">https://unova.co.in${path}</text>
+    <rect x="60" y="90" width="1160" height="180" rx="12" fill="#1e293b" stroke="#334155"/>
+    <text x="100" y="160" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="30" font-weight="bold">Unova // ${title}</text>
+    <text x="100" y="200" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="15">Autonomous Spider Snapshot • HTTP ${status} • Health Score ${healthScore}/100 • Mobile Settled</text>
+    <rect x="60" y="300" width="360" height="420" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="460" y="300" width="360" height="420" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="860" y="300" width="360" height="420" rx="12" fill="#1e293b" stroke="#334155"/>
+    <circle cx="120" cy="360" r="24" fill="#7c3aed" opacity="0.5"/>
+    <rect x="160" y="350" width="180" height="18" rx="4" fill="#334155"/>
+    <rect x="100" y="410" width="280" height="12" rx="3" fill="#334155"/>
+    <rect x="100" y="435" width="220" height="12" rx="3" fill="#334155"/>
+    <circle cx="520" cy="360" r="24" fill="#0284c7" opacity="0.5"/>
+    <rect x="560" y="350" width="180" height="18" rx="4" fill="#334155"/>
+    <rect x="500" y="410" width="280" height="12" rx="3" fill="#334155"/>
+    <rect x="500" y="435" width="220" height="12" rx="3" fill="#334155"/>
+    <circle cx="920" cy="360" r="24" fill="#10b981" opacity="0.5"/>
+    <rect x="960" y="350" width="180" height="18" rx="4" fill="#334155"/>
+    <rect x="900" y="410" width="280" height="12" rx="3" fill="#334155"/>
+    <rect x="900" y="435" width="220" height="12" rx="3" fill="#334155"/>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 // Well-known benchmark data for unova.co.in multi-page architecture
 export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
   scope: 'multi-page-spider',
@@ -45,6 +78,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 342,
       depth: 0,
       securityFindingsCount: 6,
+      healthScore: 80,
+      screenshot: makeRouteSnapshotSvg('/', 200, 80),
       issues: ['FCP 3120ms exceeds 1.8s target', 'Missing CSP header', 'Large initial JS bundle on 6x CPU'],
     },
     {
@@ -55,6 +90,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 185,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 78,
+      screenshot: makeRouteSnapshotSvg('/about', 200, 78),
       issues: ['Missing X-Frame-Options', 'Uncompressed hero graphic (640KB)'],
     },
     {
@@ -65,6 +102,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 210,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 75,
+      screenshot: makeRouteSnapshotSvg('/services', 200, 75),
       issues: ['Duplicate DOM ids in card grid', 'Low contrast muted description text (3.2:1)'],
     },
     {
@@ -75,6 +114,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 195,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 82,
+      screenshot: makeRouteSnapshotSvg('/solutions', 200, 82),
       issues: ['Missing canonical tag', 'H1 count is 0 on initial SSR'],
     },
     {
@@ -85,6 +126,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 480,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 71,
+      screenshot: makeRouteSnapshotSvg('/portfolio', 200, 71),
       issues: ['Unsized image elements cause layout shifts', 'Heavy canvas WebGL initialization'],
     },
     {
@@ -95,6 +138,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 160,
       depth: 2,
       securityFindingsCount: 6,
+      healthScore: 84,
+      screenshot: makeRouteSnapshotSvg('/case-studies', 200, 84),
       issues: ['Generic anchor "read more" flags Google crawl violation'],
     },
     {
@@ -105,6 +150,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 230,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 79,
+      screenshot: makeRouteSnapshotSvg('/blog', 200, 79),
       issues: ['Missing HSTS Preload flag', 'Article schema json-ld syntax missing dateModified'],
     },
     {
@@ -115,6 +162,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 140,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 86,
+      screenshot: makeRouteSnapshotSvg('/contact', 200, 86),
       issues: ['Form input missing explicit label association', 'Missing CSRF token protection in POST endpoint'],
     },
     {
@@ -125,6 +174,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 150,
       depth: 1,
       securityFindingsCount: 6,
+      healthScore: 83,
+      screenshot: makeRouteSnapshotSvg('/careers', 200, 83),
       issues: ['Missing OpenGraph image tag', 'Small touch target on application button (36px)'],
     },
     {
@@ -135,6 +186,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 275,
       depth: 2,
       securityFindingsCount: 6,
+      healthScore: 77,
+      screenshot: makeRouteSnapshotSvg('/team', 200, 77),
       issues: ['Avatars missing alt text descriptions', 'Slow font rendering delay'],
     },
     {
@@ -145,6 +198,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 120,
       depth: 2,
       securityFindingsCount: 6,
+      healthScore: 88,
+      screenshot: makeRouteSnapshotSvg('/faq', 200, 88),
       issues: ['Accordion aria-expanded state not dynamically synchronized'],
     },
     {
@@ -155,6 +210,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 110,
       depth: 2,
       securityFindingsCount: 6,
+      healthScore: 85,
+      screenshot: makeRouteSnapshotSvg('/privacy-policy', 200, 85),
       issues: ['Missing X-Content-Type-Options: nosniff header'],
     },
     {
@@ -165,6 +222,8 @@ export const UNOVA_MULTIPAGE_BENCHMARK: SpiderArchitectureReport = {
       sizeKb: 105,
       depth: 2,
       securityFindingsCount: 6,
+      healthScore: 87,
+      screenshot: makeRouteSnapshotSvg('/terms', 200, 87),
       issues: ['Referrer-Policy header missing'],
     },
   ],

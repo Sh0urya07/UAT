@@ -172,11 +172,111 @@ export interface PerformanceThrottlingProfile {
   simulation: ThrottlingSimulation;
 }
 
+export type CrawlScope = 'single-page' | 'multi-page-spider';
+
+export interface SpiderPageNode {
+  url: string;
+  path: string;
+  status: number;
+  loadTimeMs: number;
+  sizeKb: number;
+  depth: number;
+  securityFindingsCount: number;
+  issues: string[];
+}
+
+export interface SpiderArchitectureReport {
+  scope: CrawlScope;
+  totalPagesCrawled: number;
+  averageHealthScore: number;
+  systemicSecurityScore: number;
+  totalSystemicFindings: number;
+  aggregateMobileLoadTimeSec: number;
+  aggregateMobileStatus: 'Good' | 'Needs Optimization' | 'Critical (Too Heavy)';
+  homepagePerformance: {
+    lcpSec: number;
+    fcpMs: number;
+    totalLoadSec: number;
+    score: number;
+  };
+  pages: SpiderPageNode[];
+  routeDistribution: {
+    internal: number;
+    external: number;
+    secureHttps: number;
+  };
+}
+
+export interface ColorPaletteNode {
+  hex: string;
+  percentage: number;
+  role: 'dominant-60' | 'secondary-30' | 'accent-10';
+  emotion: string;
+  archetype: string;
+  autonomicEffect: 'Parasympathetic Restorative' | 'Sympathetic Arousal' | 'Neutral/Equilibrium';
+}
+
+export interface ApcaSample {
+  fg: string;
+  bg: string;
+  ratio: number;
+  apcaLc: number;
+  status: 'AAA' | 'AA' | 'Fail';
+  textSample: string;
+}
+
+export interface FrontendDiagnosticsReport {
+  score: number;
+  colorPsychology: {
+    score: number;
+    palette: ColorPaletteNode[];
+    apcaContrast: {
+      score: number;
+      passingCount: number;
+      failingCount: number;
+      samples: ApcaSample[];
+    };
+    saliencyVsComfort: {
+      saliencyScore: number;
+      comfortScore: number;
+      congruenceRating: 'High Alignment' | 'Attention Hijacked' | 'Subtle Balance';
+      insight: string;
+    };
+    kobayashiMood: string;
+  };
+  typography: {
+    score: number;
+    fontCount: number;
+    fonts: string[];
+    hierarchyCompliant: boolean;
+    lineHeightRatio: number;
+    lineMeasureCh: number;
+    issues: string[];
+  };
+  layoutAndMobile: {
+    score: number;
+    touchTargetsPassed: number;
+    touchTargetsSubstandard: number;
+    horizontalOverflow: boolean;
+    spacingGridCompliant: boolean;
+    issues: string[];
+  };
+  animationAndMotion: {
+    score: number;
+    averageDurationMs: number;
+    prefersReducedMotionSupported: boolean;
+    infiniteLoopsDetected: number;
+    hardwareAccelerated: boolean;
+    issues: string[];
+  };
+}
+
 export interface AuditReport {
   id: string;
   timestamp: string;
   targetUrl: string;
   finalUrl: string;
+  crawlScope?: CrawlScope;
   overallScore: number;
   scores: {
     coreWebVitals: number;
@@ -184,6 +284,7 @@ export interface AuditReport {
     linkCompliance: number;
     securityPosture: number;
     codeAndDomHealth: number;
+    frontendAndUx?: number;
   };
   coreWebVitals: {
     lcp: CoreWebVitalsMetric;
@@ -206,5 +307,7 @@ export interface AuditReport {
   };
   deepBugs: DeepBugReport;
   mobileThrottling: PerformanceThrottlingProfile;
+  spiderArchitecture?: SpiderArchitectureReport;
+  frontendDiagnostics?: FrontendDiagnosticsReport;
   screenshot?: string;
 }

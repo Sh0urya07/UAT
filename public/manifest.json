@@ -1,11 +1,11 @@
-﻿{
-  "name": "Unova // UAT Engine",
-  "short_name": "Unova UAT",
-  "description": "Official Unova UAT Diagnostic Suite",
+{
+  "name": "Unova // Spider Engine",
+  "short_name": "Unova Spider",
+  "description": "Official Unova Spider Diagnostics & Multi-Page Architecture Suite",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c0908",
-  "theme_color": "#0c0908",
+  "background_color": "#f4ece1",
+  "theme_color": "#faebd7",
   "icons": [
     {
       "src": "/unova-logo.png",

@@ -9,29 +9,32 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'Unova // UAT Engine - Autonomous Diagnostic Suite (uat.unova.co.in)',
-    template: '%s | Unova UAT Engine',
+    default: 'Unova // Spider Engine - UI/UX, Cognitive Frontend & Multi-Page Auditor (spider.unova.co.in)',
+    template: '%s | Unova Spider Engine',
   },
   description:
-    'Official Unova UAT Diagnostic Suite: Autonomous deep-level website audit engine evaluating Google Search Essentials, Core Web Vitals, crawlable link compliance, React hydration bugs, and defensive security posture.',
-  applicationName: 'Unova UAT Engine',
-  authors: [{ name: 'Unova Engineering', url: 'https://uat.unova.co.in' }],
+    'Official Unova Spider Diagnostic Suite: High-performance cognitive frontend & multi-page site architecture auditor evaluating UI/UX aesthetics, color psychology (WCAG & APCA), typography hierarchy, mobile ergonomics, Core Web Vitals, and systemic web security.',
+  applicationName: 'Unova Spider Engine',
+  authors: [{ name: 'Unova Engineering', url: 'https://spider.unova.co.in' }],
   generator: 'Next.js',
   keywords: [
     'Unova',
-    'UAT Engine',
-    'uat.unova.co.in',
+    'Spider Engine',
+    'spider.unova.co.in',
+    'UI/UX Auditor',
+    'Color Psychology',
+    'APCA Contrast',
+    'Kobayashi Image Scale',
+    'Typography Hierarchy',
     'Google Search Essentials',
     'Core Web Vitals',
-    'INP',
-    'LCP',
-    'CLS',
-    'Link Compliance',
+    'Multi-Page Spider Crawl',
+    'Web Architecture Health',
     'SARIF 2.1.0',
     'React Hydration Bugs',
     'Web Security Auditor',
   ],
-  metadataBase: new URL('https://uat.unova.co.in'),
+  metadataBase: new URL('https://spider.unova.co.in'),
   alternates: {
     canonical: '/',
   },
@@ -46,17 +49,17 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Unova // UAT Engine - Autonomous Diagnostic Suite',
+    title: 'Unova // Spider Engine - Cognitive Frontend & Multi-Page Auditor',
     description:
-      'Official Unova UAT Diagnostic Suite: Deep-level automated website auditing for Google Search Essentials, Core Web Vitals, link compliance, React hydration issues, and defensive security.',
-    url: 'https://uat.unova.co.in',
-    siteName: 'Unova UAT Engine',
+      'Official Unova Spider Diagnostic Suite: Automated multi-page site architecture crawler and frontend diagnostic suite evaluating UI/UX aesthetics, color psychology, typography, Core Web Vitals, and systemic security posture.',
+    url: 'https://spider.unova.co.in',
+    siteName: 'Unova Spider Engine',
     images: [
       {
         url: '/unova-logo.png',
         width: 512,
         height: 512,
-        alt: 'Unova UAT Engine Robot Mascot',
+        alt: 'Unova Spider Engine Robot Mascot',
       },
     ],
     locale: 'en_US',
@@ -64,8 +67,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Unova // UAT Engine - Autonomous Diagnostic Suite',
-    description: 'Autonomous deep-level website auditing engine by Unova (uat.unova.co.in).',
+    title: 'Unova // Spider Engine - Cognitive Frontend & Multi-Page Auditor',
+    description: 'Autonomous multi-page architecture and frontend UI/UX diagnostic suite by Unova (spider.unova.co.in).',
     images: ['/unova-logo.png'],
   },
 };

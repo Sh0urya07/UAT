@@ -3,16 +3,21 @@ import { analyzeDocumentLinks } from './linkAuditor';
 import { analyzeSecurity } from './securityAuditor';
 import { analyzeDeepBugsAndDom } from './deepBugDetector';
 import { simulateDeviceThrottling } from './mobileSimulator';
+import { analyzeFrontendAndUiUx } from './frontendAuditor';
+import { runSpiderCrawler, UNOVA_MULTIPAGE_BENCHMARK } from './spiderCrawler';
 import { DEMO_PRESETS } from './presets';
-import { AuditReport } from './types';
+import { AuditReport, CrawlScope, SpiderArchitectureReport, FrontendDiagnosticsReport } from './types';
 
 export async function runCompleteAudit(
   rawUrl: string,
   options?: {
     throttlingProfile?: 'desktop' | 'mid-mobile' | 'budget-2gb';
+    crawlScope?: CrawlScope;
+    maxPages?: number;
   }
 ): Promise<AuditReport> {
   let targetUrl = rawUrl.trim();
+  const crawlScope: CrawlScope = options?.crawlScope || 'single-page';
 
   // Check presets first
   if (DEMO_PRESETS[targetUrl]) {
@@ -24,6 +29,10 @@ export async function runCompleteAudit(
         preset.coreWebVitals.inp.value,
         preset.deepBugs.memoryLeakHeuristics.domNodeCount
       );
+    }
+    preset.crawlScope = crawlScope;
+    if (crawlScope === 'multi-page-spider') {
+      preset.spiderArchitecture = UNOVA_MULTIPAGE_BENCHMARK;
     }
     return preset;
   }
@@ -51,7 +60,7 @@ export async function runCompleteAudit(
       signal: controller.signal,
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (UnovaAuditBot/2.0)',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (UnovaSpiderBot/2.0)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
       },
@@ -73,7 +82,7 @@ export async function runCompleteAudit(
     try {
       const robotsUrl = new URL('/robots.txt', finalUrl).href;
       const robotsRes = await fetch(robotsUrl, {
-        headers: { 'User-Agent': 'UnovaAuditBot/2.0' },
+        headers: { 'User-Agent': 'UnovaSpiderBot/2.0' },
       });
       if (robotsRes.ok) {
         robotsTxtBody = await robotsRes.text();
@@ -88,7 +97,7 @@ export async function runCompleteAudit(
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>${targetUrl} - Audit Target</title>
+  <title>${targetUrl} - Spider Audit Target</title>
   <meta name="description" content="Automated audit target analysis.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="canonical" href="${targetUrl}">
@@ -123,7 +132,16 @@ export async function runCompleteAudit(
   // 5. Deep Bug & DOM Diagnostics
   const deepBugs = analyzeDeepBugsAndDom(html);
 
-  // 6. Calculate Component Scores
+  // 6. Cognitive Frontend & UI/UX Diagnostics
+  const frontendDiagnostics: FrontendDiagnosticsReport = analyzeFrontendAndUiUx(html, finalUrl);
+
+  // 7. Optional Multi-Page Spider Crawler
+  let spiderArchitecture: SpiderArchitectureReport | undefined = undefined;
+  if (crawlScope === 'multi-page-spider') {
+    spiderArchitecture = await runSpiderCrawler(finalUrl, html, options?.maxPages || 20);
+  }
+
+  // 8. Calculate Component Scores
   const cwvScore = Math.round(
     (cwv.lcp.rating === 'good' ? 100 : cwv.lcp.rating === 'needs-improvement' ? 70 : 40) * 0.4 +
     (cwv.inp.rating === 'good' ? 100 : cwv.inp.rating === 'needs-improvement' ? 70 : 40) * 0.35 +
@@ -148,15 +166,18 @@ export async function runCompleteAudit(
   else if (deepBugs.memoryLeakHeuristics.domNodeStatus === 'warning') domScore -= 10;
   domScore = Math.max(0, Math.min(100, domScore));
 
+  const frontendScore = frontendDiagnostics.score;
+
   const overallScore = Math.round(
-    cwvScore * 0.30 +
-    seoScore * 0.20 +
-    linkScore * 0.20 +
+    cwvScore * 0.25 +
+    frontendScore * 0.20 +
+    seoScore * 0.15 +
     securityScore * 0.20 +
+    linkScore * 0.10 +
     domScore * 0.10
   );
 
-  // 7. Dynamic Performance Throttling Profile
+  // 9. Dynamic Performance Throttling Profile
   const profileChoice = options?.throttlingProfile || 'budget-2gb';
   const mobileThrottling = simulateDeviceThrottling(
     profileChoice,
@@ -170,6 +191,7 @@ export async function runCompleteAudit(
     timestamp: new Date().toISOString(),
     targetUrl,
     finalUrl,
+    crawlScope,
     overallScore,
     scores: {
       coreWebVitals: cwvScore,
@@ -177,6 +199,7 @@ export async function runCompleteAudit(
       linkCompliance: linkScore,
       securityPosture: securityScore,
       codeAndDomHealth: domScore,
+      frontendAndUx: frontendScore,
     },
     coreWebVitals: cwv,
     searchEssentials,
@@ -184,5 +207,7 @@ export async function runCompleteAudit(
     security,
     deepBugs,
     mobileThrottling,
+    spiderArchitecture,
+    frontendDiagnostics,
   };
 }

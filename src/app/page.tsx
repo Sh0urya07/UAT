@@ -7,12 +7,12 @@ import { HeroAuditInput } from '@/components/HeroAuditInput';
 import { AuditDashboard } from '@/components/AuditDashboard';
 import { ThreeCanvasBackground } from '@/components/ThreeCanvasBackground';
 import { DEMO_PRESETS } from '@/lib/audit/presets';
-import { AuditReport } from '@/lib/audit/types';
+import { AuditReport, CrawlScope } from '@/lib/audit/types';
 import { Sparkles, Shield, Cpu, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function HomePage() {
-  const [report, setReport] = useState<AuditReport>(DEMO_PRESETS['nextjs-saas']);
+  const [report, setReport] = useState<AuditReport>(DEMO_PRESETS['unova-benchmark'] || DEMO_PRESETS['nextjs-saas']);
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -78,14 +78,15 @@ export default function HomePage() {
 
   const handleRunAudit = async (
     url: string,
-    throttlingProfile: 'desktop' | 'mid-mobile' | 'budget-2gb'
+    throttlingProfile: 'desktop' | 'mid-mobile' | 'budget-2gb',
+    crawlScope: CrawlScope = 'multi-page-spider'
   ) => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, throttlingProfile }),
+        body: JSON.stringify({ url, throttlingProfile, crawlScope }),
       });
 
       if (!res.ok) {
@@ -186,15 +187,15 @@ export default function HomePage() {
       <footer className="w-full border-t border-stone-300/80 bg-white/80 backdrop-blur-md py-8 text-center text-xs font-mono text-stone-600">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-stone-900 font-bold">UNOVA // UAT ENGINE</span>
+            <span className="text-stone-900 font-bold">UNOVA // SPIDER ENGINE</span>
             <span className="text-stone-400">•</span>
             <a
-              href="https://uat.unova.co.in"
+              href="https://spider.unova.co.in"
               target="_blank"
               rel="noreferrer"
               className="text-gengar-bright-violet font-semibold hover:underline flex items-center gap-1"
             >
-              <span>uat.unova.co.in</span>
+              <span>spider.unova.co.in</span>
               <ExternalLink className="w-3 h-3 opacity-70" />
             </a>
           </div>

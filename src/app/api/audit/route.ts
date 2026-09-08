@@ -4,7 +4,7 @@ import { runCompleteAudit } from '@/lib/audit/runner';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url, throttlingProfile } = body;
+    const { url, throttlingProfile, crawlScope, maxPages } = body;
 
     if (!url || typeof url !== 'string') {
       return NextResponse.json(
@@ -13,7 +13,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const report = await runCompleteAudit(url, { throttlingProfile });
+    const report = await runCompleteAudit(url, {
+      throttlingProfile,
+      crawlScope,
+      maxPages: typeof maxPages === 'number' ? maxPages : 20,
+    });
     return NextResponse.json(report);
   } catch (error: any) {
     console.error('[API /api/audit] Execution error:', error);

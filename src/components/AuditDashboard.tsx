@@ -7,6 +7,9 @@ import { CoreWebVitalsPanel } from './CoreWebVitalsPanel';
 import { LinkValidationPanel } from './LinkValidationPanel';
 import { PerformanceThrottler } from './PerformanceThrottler';
 import { VulnerabilityTree } from './VulnerabilityTree';
+import { SpiderArchitecturePanel } from './SpiderArchitecturePanel';
+import { ColorPsychologyPanel } from './ColorPsychologyPanel';
+import { TypographyLayoutPanel } from './TypographyLayoutPanel';
 import { AuditReport } from '@/lib/audit/types';
 import {
   Layers,
@@ -15,7 +18,10 @@ import {
   ShieldAlert,
   Download,
   Globe,
-  Clock,
+  Network,
+  Palette,
+  Type,
+  Sparkles,
 } from 'lucide-react';
 
 interface AuditDashboardProps {
@@ -24,7 +30,9 @@ interface AuditDashboardProps {
 }
 
 export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'cwv' | 'links' | 'throttler' | 'bugs'>('cwv');
+  const [activeTab, setActiveTab] = useState<
+    'spider' | 'color' | 'typography' | 'cwv' | 'links' | 'throttler' | 'bugs'
+  >(report.spiderArchitecture ? 'spider' : 'color');
   const tabContentRef = useRef<HTMLDivElement>(null);
   const scoreContainerRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +68,7 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(report, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `unova-uat-${new URL(report.targetUrl).hostname}-${Date.now()}.json`);
+    downloadAnchor.setAttribute('download', `unova-spider-${new URL(report.targetUrl).hostname}-${Date.now()}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -77,8 +85,13 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
               {report.targetUrl}
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold">
-              AUDITED
+              {report.crawlScope === 'multi-page-spider' ? 'SPIDER CRAWLED' : 'PROBED'}
             </span>
+            {report.spiderArchitecture && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-violet-50 text-violet-800 border border-violet-300 font-bold">
+                {report.spiderArchitecture.totalPagesCrawled} ROUTES
+              </span>
+            )}
           </div>
         </div>
 
@@ -102,49 +115,92 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
       </div>
 
       {/* Primary Score Meters Bar - Clean & Balanced */}
-      <div ref={scoreContainerRef} className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-xl bg-white/85 border border-stone-200/90 shadow-sm p-4 backdrop-blur-md">
+      <div ref={scoreContainerRef} className="grid grid-cols-2 sm:grid-cols-6 gap-3 rounded-xl bg-white/85 border border-stone-200/90 shadow-sm p-4 backdrop-blur-md">
         <ScoreRing
           score={report.overallScore}
           label="Overall Score"
           subtitle="Health Matrix"
-          size={120}
-          strokeWidth={8}
+          size={110}
+          strokeWidth={7}
+        />
+        <ScoreRing
+          score={report.scores.frontendAndUx ?? 88}
+          label="UI/UX & Cognitive"
+          subtitle="APCA & Bourne '26"
+          size={110}
+          strokeWidth={7}
         />
         <ScoreRing
           score={report.scores.coreWebVitals}
           label="Core Web Vitals"
           subtitle="LCP, INP, CLS"
-          size={120}
-          strokeWidth={8}
+          size={110}
+          strokeWidth={7}
         />
         <ScoreRing
           score={report.scores.seoAndIndexability}
           label="Search Essentials"
           subtitle="SEO & Indexing"
-          size={120}
-          strokeWidth={8}
+          size={110}
+          strokeWidth={7}
+        />
+        <ScoreRing
+          score={report.scores.securityPosture}
+          label="Security Posture"
+          subtitle="Headers & TLS"
+          size={110}
+          strokeWidth={7}
         />
         <ScoreRing
           score={report.scores.linkCompliance}
           label="Link Quality"
           subtitle="Crawlable Anchors"
-          size={120}
-          strokeWidth={8}
-        />
-        <ScoreRing
-          score={report.scores.securityPosture}
-          label="Security Posture"
-          subtitle="CSP, HSTS, Framing"
-          size={120}
-          strokeWidth={8}
+          size={110}
+          strokeWidth={7}
         />
       </div>
 
       {/* Clean Navigation Tabs */}
-      <div className="flex border-b border-stone-300/80 gap-2 overflow-x-auto pb-1">
+      <div className="flex border-b border-stone-300/80 gap-2 overflow-x-auto pb-1 scrollbar-thin">
+        <button
+          onClick={() => setActiveTab('spider')}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+            activeTab === 'spider'
+              ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
+          }`}
+        >
+          <Network className={`w-3.5 h-3.5 ${activeTab === 'spider' ? 'text-violet-300' : 'text-stone-500'}`} />
+          <span>Spider Architecture {report.spiderArchitecture ? `(${report.spiderArchitecture.totalPagesCrawled}p)` : ''}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('color')}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+            activeTab === 'color'
+              ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
+          }`}
+        >
+          <Palette className={`w-3.5 h-3.5 ${activeTab === 'color' ? 'text-pink-300' : 'text-stone-500'}`} />
+          <span>Color & APCA</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('typography')}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+            activeTab === 'typography'
+              ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
+          }`}
+        >
+          <Type className={`w-3.5 h-3.5 ${activeTab === 'typography' ? 'text-blue-300' : 'text-stone-500'}`} />
+          <span>Typography & Ergonomics</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('cwv')}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
             activeTab === 'cwv'
               ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
               : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
@@ -156,19 +212,19 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
 
         <button
           onClick={() => setActiveTab('links')}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
             activeTab === 'links'
               ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
               : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
           }`}
         >
           <Link2 className={`w-3.5 h-3.5 ${activeTab === 'links' ? 'text-violet-300' : 'text-stone-500'}`} />
-          <span>Link Validation ({linkCount(report)})</span>
+          <span>Links ({linkCount(report)})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('throttler')}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
             activeTab === 'throttler'
               ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
               : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
@@ -180,7 +236,7 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
 
         <button
           onClick={() => setActiveTab('bugs')}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all whitespace-nowrap ${
             activeTab === 'bugs'
               ? 'bg-stone-900 text-white border border-stone-900 shadow-sm'
               : 'text-stone-600 hover:text-stone-900 hover:bg-white/80 border border-transparent'
@@ -193,6 +249,9 @@ export function AuditDashboard({ report, onExportSarif }: AuditDashboardProps) {
 
       {/* Tab Panels */}
       <div ref={tabContentRef}>
+        {activeTab === 'spider' && <SpiderArchitecturePanel spider={report.spiderArchitecture} targetUrl={report.targetUrl} />}
+        {activeTab === 'color' && <ColorPsychologyPanel diagnostics={report.frontendDiagnostics} />}
+        {activeTab === 'typography' && <TypographyLayoutPanel diagnostics={report.frontendDiagnostics} />}
         {activeTab === 'cwv' && <CoreWebVitalsPanel report={report} />}
         {activeTab === 'links' && <LinkValidationPanel report={report} />}
         {activeTab === 'throttler' && <PerformanceThrottler report={report} />}

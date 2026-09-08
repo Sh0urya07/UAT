@@ -22,14 +22,14 @@ export function Header({ currentReport, onExportSarif, isAuditing = false }: Hea
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-sm sm:text-base font-bold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors">
-                Unova <span className="text-gengar-bright-violet font-normal">//</span> UAT Engine
+                Unova <span className="text-gengar-bright-violet font-normal">//</span> Spider Engine
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-300 shadow-sm">
-                uat.unova.co.in
+                spider.unova.co.in
               </span>
             </div>
             <span className="text-[10px] text-stone-500 hidden sm:block tracking-wide font-sans">
-              Autonomous Diagnostic Suite
+              Cognitive Frontend & Multi-Page Architecture Suite
             </span>
           </div>
         </a>
